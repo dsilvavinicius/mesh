@@ -942,7 +942,7 @@ class MeshViewerRemote(object):
         glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH)
         glutInitWindowSize(width, height)
         glutInitWindowPosition(0, 0)
-        self.root_window_id = glutCreateWindow(self.titlebar)
+        self.root_window_id = glutCreateWindow(self.titlebar.encode())
         glutDisplayFunc(self.on_draw)
 
         glutTimerFunc(100, self.checkQueue, 0)

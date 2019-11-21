@@ -58,8 +58,9 @@ class build_deflate_cgal(Command):
         pass
 
     def run(self):
-
-        CGAL_dir_deflate = os.path.abspath(self.build_temp)
+        
+        CGAL_dir_deflate = os.path.join(os.path.abspath(self.build_temp), 'Release')
+        #CGAL_dir_deflate = os.path.abspath(self.build_temp)
 
         log.info('[CGAL] deflating cgal from "%s" to "%s"', CGAL_archive, CGAL_dir_deflate)
         if not os.path.exists(os.path.join(CGAL_dir_deflate, 'CGAL-4.7')):
@@ -82,7 +83,7 @@ class build_ext(_build_ext):
 
     user_options = [('boost-location=', None, 'specifies the location of the boost folder (only include needed)'),
                     ] + _build_ext.user_options
-
+    
     def initialize_options(self):
         self.boost_location = None
         return _build_ext.initialize_options(self)
@@ -100,7 +101,7 @@ class build_ext(_build_ext):
             # check for subfolders in the boost-x-yy-z sense
             # check for env variables
             self.boost_location = os.path.expanduser(self.boost_location)
-
+            
         return _build_ext.finalize_options(self)
 
     def build_extension(self, ext):
@@ -182,7 +183,7 @@ def _get_all_extensions():
         return []
 
     # valid only for gcc/clang
-    extra_args = ['-O3']
+    extra_args = ['-O3', '/O2']
 
     import sys
     if sys.platform.find('linux') > -1:
@@ -194,9 +195,11 @@ def _get_all_extensions():
         ('CGAL_NDEBUG', 1),
         ('MESH_CGAL_AVOID_COMPILED_VERSION', 1),
         ('CGAL_HAS_NO_THREADS', 1),
-        ('CGAL_NO_AUTOLINK_CGAL', 1)
+        ('CGAL_NO_AUTOLINK_CGAL', 1),
+        ('CGAL_BUILD_SHARED_LIBS', 1)
     ]
 
+    #undef_macros = ['CGAL_EXPORTS']
     undef_macros = []
 
     package_name_and_srcs = [('aabb_normals', ['mesh/src/aabb_normals.cpp'], define_macros_mesh_ext_without_cgal_link),
@@ -210,14 +213,24 @@ def _get_all_extensions():
 
     for current_package_name, src_list, additional_defines in package_name_and_srcs:
         ext = _Extension("%s.mesh.%s" % (namespace_package, current_package_name),
-                         src_list,
-                         language="c++",
-                         include_dirs=['mesh/src', numpy.get_include()],
-                         libraries=[],
-                         define_macros=define_macros + additional_defines,
-                         undef_macros=undef_macros,
-                         extra_compile_args=extra_args,
-                         extra_link_args=extra_args)
+                     src_list,
+                     language="c++",
+                     include_dirs=['mesh/src', numpy.get_include()],
+                     libraries=['CGAL-vc140-mt-4.7', 'CGAL_Core-vc140-mt-4.7', 'libmpfr-4', 'libgmp-10'],
+                     library_dirs=['C:/local/CGAL-4.7/bin/lib', 'C:/local/CGAL-4.7/auxiliary/gmp/lib'],
+                     define_macros=define_macros + additional_defines,
+                     undef_macros=undef_macros,
+                     extra_compile_args=extra_args,
+                     extra_link_args=extra_args)
+        #   ext = _Extension("%s.mesh.%s" % (namespace_package, current_package_name),
+        #                   src_list,
+        #                   language="c++",
+        #                   include_dirs=['mesh/src', numpy.get_include()],
+        #                   libraries=[],
+        #                   define_macros=define_macros + additional_defines,
+        #                   undef_macros=undef_macros,
+        #                   extra_compile_args=extra_args,
+        #                   extra_link_args=extra_args)
 
         out += [ext]
 
@@ -233,7 +246,7 @@ if has_setup_tools:
     additional_kwargs['zip_safe'] = not all_extensions
     additional_kwargs['test_suite'] = "tests"
     additional_kwargs['namespace_packages'] = [namespace_package]
-
+    
 cmdclass = {'build_ext': build_ext,
             'build_deflate_cgal': build_deflate_cgal,
             'sdist': sdist,
@@ -246,6 +259,7 @@ packages = [namespace_package,
             '%s.mesh.geometry' % namespace_package,
             '%s.mesh.serialization' % namespace_package
             ]  # actual subpackage described here
+
 
 package_dir = {namespace_package: '%s-mesh-namespace' % namespace_package,
                '%s.mesh' % namespace_package: 'mesh',  # actual subpackage described here

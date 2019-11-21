@@ -6,3 +6,4 @@ pillow
 pyzmq
 pyyaml
 opencv-python
+wheel
