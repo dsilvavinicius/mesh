@@ -8,7 +8,7 @@ from os.path import join as pjoin
 from psbody.mesh.mesh import Mesh
 from psbody.mesh.errors import MeshError, SerializationError
 
-from .unittest_extensions import ExtendedTest
+from unittest_extensions import ExtendedTest
 
 from tests.folders import test_data_folder
 
@@ -48,7 +48,7 @@ class TestMesh(ExtendedTest):
 
     def test_ascii_bad_ply(self):
         """Ensure that the proper exception is raised when a file fails to be read."""
-        with self.assertRaisesRegex(SerializationError, 'Failed to open PLY file\.'):
+        with self.assertRaisesRegex(SerializationError, 'Unable to open file'):
             Mesh(filename=self.test_bad_ply_path)
 
         # The next two tests are unnecessary,
