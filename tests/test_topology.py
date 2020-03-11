@@ -7,7 +7,7 @@ import numpy as np
 import unittest
 import os
 
-from . import test_data_folder, temporary_files_folder
+from tests.folders import test_data_folder, temporary_files_folder
 
 
 class TestVisibility(unittest.TestCase):

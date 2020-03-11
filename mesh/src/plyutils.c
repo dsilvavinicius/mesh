@@ -77,7 +77,14 @@ static PyObject * plyutils_read(PyObject *self, PyObject *args)
     }
     ply = ply_open(filename, error_cb);
     if (!ply) {
-        PyErr_SetString(PlyutilsError, "Failed to open PLY file.");
+        // This string was occluding the real error coming from the callback. THIS IS REALLY BAD DESIGN, AND I HAD LOST
+        // A LOT USEFUL TIME TO FIND THIS DAMN LINE IN THE MIDDLE OF THE LIBRARY TO FIND THAT MY DAMN PLY FILES HAD CRLF
+        // INSTEAD OF LF AND THAT RPLY COULD NOT READ THEM!
+
+        //PyErr_SetString(PlyutilsError, "Failed to open PLY file."); // CURSED LINE, I VANQUISH YOU!
+
+        // Phew, now I'm better.
+
         return NULL;
     }
     if (!ply_read_header(ply)) {
@@ -286,5 +293,6 @@ int face_cb(p_ply_argument argument) {
 }
 
 void error_cb(const char *message) {
+    // THIS IS THE PLACE TO REPORT ERROR, OK?
     PyErr_SetString(PlyutilsError, message);
 }

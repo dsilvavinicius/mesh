@@ -6,7 +6,7 @@ import time
 
 from psbody.mesh.meshviewer import MeshViewers
 from psbody.mesh.mesh import Mesh
-from . import test_data_folder
+from tests.folders import test_data_folder
 
 try:
     import PIL

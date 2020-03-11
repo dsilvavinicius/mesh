@@ -10,7 +10,7 @@ from psbody.mesh.errors import MeshError, SerializationError
 
 from .unittest_extensions import ExtendedTest
 
-from . import test_data_folder
+from tests.folders import test_data_folder
 
 
 class TestMesh(ExtendedTest):

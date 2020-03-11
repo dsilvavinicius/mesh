@@ -6,7 +6,7 @@ import os
 import numpy as np
 import unittest
 
-from . import test_data_folder
+from tests.folders import test_data_folder
 from psbody.mesh.mesh import Mesh
 from psbody.mesh.geometry.tri_normals import TriToScaledNormal, NormalizeRows
 import psbody.mesh.aabb_normals as aabb_normals

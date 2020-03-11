@@ -8,7 +8,7 @@ import os
 import numpy as np
 import unittest
 
-from . import test_data_folder
+from tests.folders import test_data_folder
 from unittest.case import skipUnless
 
 try:
