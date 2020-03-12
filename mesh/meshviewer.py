@@ -82,6 +82,7 @@ import OpenGL.arrays.vbo
 if __package__ is not None:
     from .mesh import Mesh
     from .geometry.tri_normals import TriNormals
+    from .geometry.vert_normals import vert_normals
     from .arcball import ArcBallT, Matrix3fT, Matrix4fT, Point2fT, \
         Matrix3fMulMatrix3f, Matrix3fSetRotationFromQuat4f, Matrix4fSetRotationFromMatrix3f
 
@@ -830,6 +831,7 @@ class MeshViewerSingle(object):
                 # Precompute vertex vbo
                 fidxs = m.f.flatten() if len(m.f) > 0 else np.arange(len(m.v))
                 allpts = m.v[fidxs].astype(np.float32).flatten()
+
                 vbo = OpenGL.arrays.vbo.VBO(allpts)
                 m.vbo = {'v': vbo}
 
@@ -839,8 +841,12 @@ class MeshViewerSingle(object):
                     ns = ns[m.f.flatten(), :]
                     m.vbo['vn'] = OpenGL.arrays.vbo.VBO(ns.flatten())
                 elif hasattr(m, 'f') and m.f.size > 0:
-                    ns = TriNormals(m.v, m.f).reshape(-1, 3)
-                    ns = np.tile(ns, (1, 3)).reshape(-1, 3).astype(np.float32)
+                    ns = vert_normals(m.v, m.f)
+                    ns = ns[fidxs].astype(np.float32).flatten()
+
+                    #ns = TriNormals(m.v, m.f).reshape(-1, 3)
+                    #ns = np.tile(ns, (1, 3)).reshape(-1, 3).astype(np.float32)
+
                     m.vbo['vn'] = OpenGL.arrays.vbo.VBO(ns.flatten())
 
                 # Precompute texture vbo
@@ -1089,6 +1095,7 @@ class MeshViewerRemote(object):
         # sys.stderr.write('fps: %.2e\n' % (1. / (time.time() - self.tm_for_fps)))
         self.tm_for_fps = time.time()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
         cameras = []
         for mvl in self.mesh_viewers:
             cameras.append([])
