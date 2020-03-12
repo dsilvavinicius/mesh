@@ -208,7 +208,7 @@ def MeshViewer(titlebar='Mesh Viewer',
         result.static_lines = static_lines
     result.autorecenter = autorecenter
 
-    return result
+    return result, mv.p
 
 
 def MeshViewers(shape=(1, 1),
@@ -234,7 +234,7 @@ def MeshViewers(shape=(1, 1),
                          keepalive=keepalive,
                          window_width=window_width,
                          window_height=window_height)
-    return mv.get_subwindows()
+    return mv.get_subwindows(), mv.p
 
 
 class MeshSubwindow(object):
@@ -336,27 +336,30 @@ class MeshViewerLocal(object):
         result.client = zmq.Context.instance().socket(zmq.PUSH)
         result.client.linger = 0
 
-        with open(os.devnull) as dev_null, \
-            tempfile.TemporaryFile() as err:
+        with open(os.devnull) as dev_null:
+            result.p = _run_self([titlebar, str(shape[0]), str(shape[1]), str(window_width), str(window_height)],
+                                 stdin=dev_null,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
 
-                result.p = _run_self([titlebar, str(shape[0]), str(shape[1]), str(window_width), str(window_height)],
-                                     stdin=dev_null,
-                                     stdout=subprocess.PIPE,
-                                     stderr=err)
+            line = result.p.stdout.readline().decode()
 
-                line = result.p.stdout.readline().decode()
-                result.p.stdout.close()
-                current_port = re.match('<PORT>(.*?)</PORT>', line)
-                if not current_port:
-                    raise Exception("MeshViewer remote appears to have failed to launch")
-                current_port = int(current_port.group(1))
-                result.client.connect('tcp://127.0.0.1:%d' % (current_port))
+            # Closing standard output for the new process. NOW IT IS IN STEALTH MODE AND CANNOT BE DEBUGGED. WHY DO
+            # NOT CALL IT SOLID SNAKE??? SEEMS LIKE A GOOD IDEA!!!
 
-                if uid:
-                    MeshViewerLocal.managed[uid] = result
-                result.shape = shape
-                result.keepalive = keepalive
-                return result
+            # result.p.stdout.close() # DIE, MONSTER! YOU DON'T BELONG TO THIS WORLD!
+
+            current_port = re.match('<PORT>(.*?)</PORT>', line)
+            if not current_port:
+                raise Exception("MeshViewer remote appears to have failed to launch")
+            current_port = int(current_port.group(1))
+            result.client.connect('tcp://127.0.0.1:%d' % (current_port))
+
+            if uid:
+                MeshViewerLocal.managed[uid] = result
+            result.shape = shape
+            result.keepalive = keepalive
+            return result
 
     def get_subwindows(self):
         return [[MeshSubwindow(parent_window=self, which_window=(r, c)) for c in range(self.shape[1])] for r in range(self.shape[0])]

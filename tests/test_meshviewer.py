@@ -22,7 +22,7 @@ class TestMeshViewer(unittest.TestCase):
 
         self.meshes = [Mesh(filename=fname) for fname in fnames]
 
-        self.mvs = MeshViewers(shape=[2, 2])
+        self.mvs, self.process = MeshViewers(shape=[2, 2])
         self.mvs[0][0].set_static_meshes([self.meshes[0]])
         self.mvs[0][1].set_static_meshes([self.meshes[1]])
         self.mvs[1][0].set_static_meshes([self.meshes[2]])
@@ -34,8 +34,9 @@ class TestMeshViewer(unittest.TestCase):
         sphere = Mesh(filename=os.path.join(test_data_folder, 'sphere.ply'))
         sphere.v = sphere.v / 10.
 
-        print('keeping MeshViewer alive for 10 seconds..')
-        time.sleep(10)
+        stdout, stderr = self.process.communicate()
+        print(stdout.decode())
+        print(stderr.decode())
         print('killing MeshViewer and exiting...')
 
         if 0:
